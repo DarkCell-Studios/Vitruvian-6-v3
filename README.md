@@ -7,10 +7,6 @@ delegate script.
 
 ## Requirements
 
-- Docker
-- Internet connectivity to reach the public NASA S3 bucket
-
-## Build the image
 
 ```bash
 docker build -t nasa-kaguya-iiif .
@@ -29,6 +25,7 @@ docker run \
 - The container listens on port **8182**.
 - A local `cache/` directory is mounted into the container so tiles and info documents can be reused across runs.
 - JVM heap size is fixed to `-Xmx4g` inside the image; adjust the Docker resource limits if you need more.
+
 
 ## IIIF identifiers
 
