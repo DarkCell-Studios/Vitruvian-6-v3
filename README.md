@@ -27,6 +27,7 @@ docker run \
 - JVM heap size is fixed to `-Xmx4g` inside the image; adjust the Docker resource limits if you need more.
 
 
+
 ## IIIF identifiers
 
 The delegates script maps short identifiers to NASA S3 object URLs:
