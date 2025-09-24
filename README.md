@@ -7,26 +7,6 @@ delegate script.
 
 ## Requirements
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or any Docker Engine with build support)
-- Internet connectivity to reach the public NASA S3 bucket
-
-> **Note for Windows users:** run the commands below from *PowerShell* or *Git Bash* after installing Docker
-> Desktop. If `docker` reports "command not found" you still need to finish the Docker installation and restart
-> your shell. This repository does **not** use Node.js or `npm` tooling.
-
-## Clone the repository
-
-```powershell
-# PowerShell example
-cd D:\Work
-git clone https://github.com/<your-org>/Vitruvian-6-v3.git
-cd Vitruvian-6-v3
-```
-
-## Build the image
-
-Run from the repository root and keep the trailing `.` which tells Docker to use the current directory as the
-build context.
 
 ```bash
 docker build -t nasa-kaguya-iiif .
@@ -46,13 +26,6 @@ docker run \
 - A local `cache/` directory is mounted into the container so tiles and info documents can be reused across runs.
 - JVM heap size is fixed to `-Xmx4g` inside the image; adjust the Docker resource limits if you need more.
 
-### Windows path syntax
-
-If you prefer PowerShell syntax for the cache volume, replace the mount with:
-
-```powershell
--v ${PWD}/cache:/var/cache/cantaloupe
-```
 
 ## IIIF identifiers
 
@@ -92,14 +65,6 @@ non-root `cantaloupe` user.
 - To use a different cache location, either change `FilesystemCache.pathname` in
   [`cantaloupe.properties`](cantaloupe.properties) or mount a different host path into `/var/cache/cantaloupe`.
 - If you already host the Kaguya GeoTIFFs elsewhere, point the delegate mappings to your preferred URLs.
-
-## Troubleshooting
-
-| Symptom | Fix |
-| ------- | --- |
-| `docker: command not found` | Install Docker Desktop (or start the Docker daemon) and reopen your terminal. |
-| Build fails with `context must be a directory` | Re-run `docker build` **with** the trailing `.` while in the repository root. |
-| Requests return 404 | Check the container logs; an unknown identifier will be logged by `delegates.rb`. |
 
 ## License
 
