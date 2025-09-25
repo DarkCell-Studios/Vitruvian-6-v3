@@ -1,8 +1,8 @@
 FROM eclipse-temurin:11-jre
 
 ARG CANTALOUPE_VERSION=6.0.0
-ARG CANTALOUPE_DOWNLOAD_URL=https://github.com/cantaloupe-project/cantaloupe/releases/download/v${CANTALOUPE_VERSION}/cantaloupe-${CANTALOUPE_VERSION}.zip
-ARG CANTALOUPE_FALLBACK_URL=https://repo1.maven.org/maven2/edu/illinois/library/cantaloupe/${CANTALOUPE_VERSION}/cantaloupe-${CANTALOUPE_VERSION}.zip
+ARG CANTALOUPE_PRIMARY_URL=https://repo1.maven.org/maven2/edu/illinois/library/cantaloupe/${CANTALOUPE_VERSION}/cantaloupe-${CANTALOUPE_VERSION}.zip
+ARG CANTALOUPE_FALLBACK_URL=https://github.com/cantaloupe-project/cantaloupe/releases/download/v${CANTALOUPE_VERSION}/cantaloupe-${CANTALOUPE_VERSION}.zip
 
 ENV CANTALOUPE_VERSION=${CANTALOUPE_VERSION} \
     CANTALOUPE_HOME=/opt/cantaloupe
@@ -16,12 +16,28 @@ RUN useradd --system --create-home --shell /bin/bash cantaloupe
 WORKDIR /opt
 
 RUN set -eux; \
-    curl -fSL "${CANTALOUPE_DOWNLOAD_URL}" -o cantaloupe.zip \
-    || { [ -n "${CANTALOUPE_FALLBACK_URL}" ] && curl -fSL "${CANTALOUPE_FALLBACK_URL}" -o cantaloupe.zip; } \
-    || { echo "Unable to download Cantaloupe distribution" >&2; exit 1; }; \
-    unzip -q cantaloupe.zip; \
+    tmpdir="$(mktemp -d)"; \
+    cd "${tmpdir}"; \
+    success=0; \
+    for url in "${CANTALOUPE_PRIMARY_URL}" "${CANTALOUPE_FALLBACK_URL}"; do \
+        if [ -z "${url}" ]; then continue; fi; \
+        if curl -fSL "${url}" -o cantaloupe.zip; then \
+            if unzip -tq cantaloupe.zip > /dev/null 2>&1; then \
+                success=1; \
+                break; \
+            fi; \
+        fi; \
+        rm -f cantaloupe.zip; \
+    done; \
+    if [ "${success}" -ne 1 ]; then \
+        echo "Unable to download a valid Cantaloupe distribution" >&2; \
+        exit 1; \
+    fi; \
+    unzip -q cantaloupe.zip -d /opt; \
     rm cantaloupe.zip; \
-    ln -s /opt/cantaloupe-${CANTALOUPE_VERSION} "${CANTALOUPE_HOME}"
+    ln -s /opt/cantaloupe-${CANTALOUPE_VERSION} "${CANTALOUPE_HOME}"; \
+    cd /opt; \
+    rm -rf "${tmpdir}"
 
 RUN mkdir -p /etc/cantaloupe
 

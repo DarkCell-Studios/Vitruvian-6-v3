@@ -8,8 +8,8 @@ delegate script.
 ## Requirements
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or any Docker Engine with build support)
-- Internet connectivity so the Docker build can download the Cantaloupe distribution (GitHub release with a Maven
-  Central fallback)
+- Internet connectivity so the Docker build can download the Cantaloupe distribution (Maven Central with a GitHub
+  release fallback)
 - Access to the public NASA S3 bucket that hosts the Kaguya mosaics
 
 > **Note for Windows users:** run the commands below from *PowerShell* or *Git Bash* after installing Docker
@@ -35,17 +35,17 @@ build context.
 docker build -t nasa-kaguya-iiif .
 ```
 
-The Dockerfile first tries to download the official Cantaloupe `6.0.0` zip from GitHub, then falls back to the
-Maven Central mirror if GitHub is not reachable.
+The Dockerfile first tries to download the official Cantaloupe `6.0.0` zip from Maven Central, then falls back to the
+GitHub release asset if Maven is not reachable.
 
 ### Offline or firewalled environments
 
-If neither GitHub nor Maven Central are accessible from your build host, download the
+If neither Maven Central nor GitHub are accessible from your build host, download the
 `cantaloupe-6.0.0.zip` archive separately (for example on a machine with internet access) and point the build to it:
 
 ```bash
 docker build \
-  --build-arg CANTALOUPE_DOWNLOAD_URL=file:///absolute/path/to/cantaloupe-6.0.0.zip \
+  --build-arg CANTALOUPE_PRIMARY_URL=file:///absolute/path/to/cantaloupe-6.0.0.zip \
   -t nasa-kaguya-iiif .
 ```
 
@@ -121,7 +121,7 @@ non-root `cantaloupe` user.
 | ------- | --- |
 | `docker: command not found` | Install Docker Desktop (or start the Docker daemon) and reopen your terminal. |
 | `open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.` | Start Docker Desktop so the Linux container engine is running, then retry the build. |
-| `curl: (56) CONNECT tunnel failed, response 403` during `docker build` | Provide a reachable `CANTALOUPE_DOWNLOAD_URL` or ensure the build host can access GitHub or Maven Central. |
+| `curl: (56) CONNECT tunnel failed, response 403` during `docker build` | Provide a reachable `CANTALOUPE_PRIMARY_URL` or ensure the build host can access Maven Central or GitHub. |
 | Build fails with `context must be a directory` | Re-run `docker build` **with** the trailing `.` while in the repository root. |
 | Requests return 404 | Check the container logs; an unknown identifier will be logged by `delegates.rb`. |
 
